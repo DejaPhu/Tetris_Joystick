@@ -1,4 +1,4 @@
-/* Task 2: owns engine/FSM and PWM. Queue 2 carries tokens, not frame structs. */
+/* Task 2: owns engine/FSM and buzzer. Queue 2 carries tokens, not frame structs. */
 #include <string.h>
 #include "main.h"
 #include "FreeRTOS.h"

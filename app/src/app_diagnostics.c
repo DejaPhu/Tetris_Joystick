@@ -6,15 +6,14 @@
 #include "app_diagnostics.h"
 #include "app_log.h"
 #include "hal_uart.h"
+#include "hal_buzzer.h"
 volatile AppDiagnostics app_diagnostics;
 extern osThreadId_t InputTaskHandle,GameTaskHandle,DisplayTaskHandle;
 void app_fault(AppFault reason) {
+    tone(0U,0U); /* Silence before logging/halting, even if a beep was active. */
     app_diagnostics.fault=reason;
     app_log("FAULT",reason,0U,0U);
     uart_debug_panic_flush(); /* Best effort; Watch remains authoritative on fatal errors. */
-    /* Stop PWM without using a blocking HAL API after a scheduler/memory failure. */
-    TIM4->CCER &= ~TIM_CCER_CC1E;
-    __HAL_RCC_TIM4_CLK_DISABLE();
     __disable_irq();
     for (;;) { /* Break here in ST-Link to inspect fault. */ }
 }

@@ -39,3 +39,9 @@ for adc in ['ADC1','ADC2']:
  assert ioc[adc+'.SamplingTime-0\\#ChannelRegularConversion']=='ADC_SAMPLETIME_55CYCLES_5'
  assert 'HAL_ADCEx_Calibration_Start(&hadc'+adc[-1]+')' in s
 print('PASS: ADC HAL enabled, CubeMX channels/sampling/12MHz clock, both ADCs calibrated')
+
+assert ioc['PB6.Signal']=='GPIO_Output'
+assert ioc['PB6.PinState']=='GPIO_PIN_SET'
+assert 'MX_TIM4_Init' not in s
+assert s.index('HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET)') < s.index('HAL_GPIO_Init(BUZZER_GPIO_Port, &GPIO_InitStruct)')
+print('PASS: active-low buzzer PB6 GPIO, startup HIGH preload, no TIM4 PWM init')

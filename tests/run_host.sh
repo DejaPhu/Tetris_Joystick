@@ -12,3 +12,5 @@ cc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g -Itests/joysti
 build/host/test_joystick_adc
 cc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g -Itests/joystick_stubs -Ihal/inc -Iapp/inc tests/test_joystick_task.c app/src/task_input.c app/src/joystick_filter.c app/src/button_filter.c -o build/host/test_joystick_task
 build/host/test_joystick_task
+cc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g -Itests/buzzer_stubs -Ihal/inc tests/test_buzzer.c hal/src/hal_buzzer.c -o build/host/test_buzzer
+build/host/test_buzzer

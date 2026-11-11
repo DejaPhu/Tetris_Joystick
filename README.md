@@ -19,11 +19,13 @@
 | Nút PAUSE | PA8 → GND |
 | Nút ROTATE bổ sung, tùy chọn | PB14 → GND |
 | OLED SSD1306, địa chỉ 7-bit 0x3C | PB8 SCL / PB9 SDA, I2C1 remap, pull-up 3.3V |
-| Buzzer thụ động | PB6, TIM4_CH1 PWM |
+| Buzzer active kích LOW (`低电平触发`) | IO → PB6, GPIO output: HIGH tắt / LOW kêu |
 | USB–UART TTL 3.3V | PA9 TX → RX adapter; GND chung; PA10 RX tùy chọn |
 | ST-Link SWD | PA13 SWDIO / PA14 SWCLK / GND |
 
 PB12/PB13/PB15 không cần nút nữa; mặc định phần mềm không đọc ba nút cũ này. PB10 được dùng trực tiếp cho SW, không cần thêm nút hard drop. Xem [hướng dẫn joystick](docs/JOYSTICK.md) và [pin mapping](docs/PIN_MAPPING.md).
+
+Buzzer đã sửa cho module kích LOW; xem [đấu nối, mức tắt và kiểm thử](docs/BUZZER.md).
 
 ## Điều khiển
 

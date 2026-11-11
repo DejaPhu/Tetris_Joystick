@@ -54,3 +54,5 @@ Không đổi kích thước Queue hay quyền sở hữu game. `BTN_ROTATE` đ�
 5. PAUSE rồi lên/xuống chọn Resume/Restart/Main Menu; trái hoặc PAUSE tiếp tục chơi. Nút PB14 xoay bổ sung nếu có.
 6. Reset trong khi gạt cần: không tự chọn menu, đưa về tâm rồi thử lại. Thử gạt chéo và xem không có hai hướng cùng lúc.
 7. Chơi liên tục, theo dõi stack/heap/Queue/UART; đo chu kỳ InputTask bằng debugger/logic analyzer nếu cần. Kết quả timing và chiều vật lý chỉ được xác nhận sau các bước này.
+
+Buzzer hiện dùng module active kích LOW, PB6 GPIO (đã thay TIM4 PWM); xem [BUZZER.md](BUZZER.md). Báo cáo JOYSTICK trước bản sửa buzzer được giữ làm lịch sử.
