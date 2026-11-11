@@ -21,6 +21,8 @@ uint8_t uart_debug_write(const char *data,uint16_t length) {
     uint16_t free_bytes,i,pos;
     uint32_t mask;
     if (!data || !length) return 0U;
+    /* Nhieu Task co the ghi log: bao ve ca dong ngan bang PRIMASK,
+     * phuc hoi dung mask cu thay vi bat ngat vo dieu kien. */
     mask=__get_PRIMASK();__disable_irq();
     free_bytes=(uint16_t)((tail+TX_SIZE-head-1U)%TX_SIZE);
     /* All-or-nothing lines; never wait when the ring is full. */
@@ -33,6 +35,7 @@ uint8_t uart_debug_write(const char *data,uint16_t length) {
     USART1->CR1 |= USART_CR1_TXEIE;
     __set_PRIMASK(mask);return 1U;
 }
+/* ISR khong goi RTOS API; moi ngat TXE lay mot byte tu ring buffer. */
 void uart_debug_irq(void) {
     if ((USART1->CR1 & USART_CR1_TXEIE) && (USART1->SR & USART_SR_TXE)) {
         if(tail!=head) {USART1->DR=(uint8_t)tx[tail];tail=next(tail);sent++;}

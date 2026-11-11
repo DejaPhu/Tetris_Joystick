@@ -2,7 +2,7 @@
 #define APP_SHARED_H
 
 /* Shared API contract for the three application Tasks and helper modules.
- * Matches CMSIS-RTOS2 queues in Teris.ioc:
+ * Matches CMSIS-RTOS2 queues in Tetris_Joystick.ioc:
  * 16 x uint16_t input events, 1 x uint16_t frame notification. */
 
 #include <stdint.h>

@@ -1,27 +1,17 @@
-> Bản joystick: xem [đấu dây, module và checklist phần cứng](JOYSTICK.md) và [kết quả kiểm thử mới](test-results/JOYSTICK.md). Nội dung bên dưới được giữ từ bản nền.
+# Bản đồ module và comment học code
 
-# Module và giải thích mã lệnh chính
+Comment mới dùng tiếng Việt không dấu trong mã C để dễ hiển thị trên Keil 5. Tập trung giải thích quyền sở hữu, lý do thuật toán, timing và nhánh lỗi; không thêm comment học vào thư viện ST/CMSIS/FreeRTOS.
 
-Comment trong nguồn giải thích mục đích, quyền sở hữu dữ liệu, giới hạn thời gian và xử lý lỗi; không lặp lại từng câu lệnh C hiển nhiên.
+| Nhóm | Module | Người học chính | Nội dung cần đọc trong comment |
+|---|---|---|---|
+| Startup/tích hợp | `main.c`, `bsp/inc`, `bsp/src`, `bsp/startup` | Cả nhóm; TV1 quản lý cấu hình | Init → kernel → Queue → Task; GPIO buzzer HIGH sớm |
+| Input | `task_input.c`, `joystick_filter.c`, `button_filter.c` | TV1 | Mã logic, calibration, hysteresis, debounce, pending/repeat |
+| Driver input | `hal_gpio.c`, `hal_joystick.c` | TV1 | Active-low, ADC timeout, cặp mẫu hoàn chỉnh |
+| Game | `task_game.c`, `game_engine.c`, `game_fsm.c` | TV2 | Engine owner, mask/collision/row clear, FSM/deadline, snapshot |
+| Buzzer | `hal_buzzer.c` | TV2 | Module kích LOW, HIGH tắt, poll deadline |
+| Display | `task_display.c`, `ui_renderer.c`, `hal_oled.c` | TV3 | Snapshot copy, token, pixel/page, I2C và retry |
+| Chẩn đoán chung | `app_log.c`, `hal_uart.c`, `app_diagnostics.c` | Cả nhóm; TV1 tìm hiểu UART, TV2 timing/heap/stack | Ring buffer bảo vệ PRIMASK, ISR không gọi RTOS, mute fatal |
+| Contract chung | `app_cfg.h`, `app_shared.h`, `app_ipc.h`, `task_*.h` | Cả nhóm | Byte/word, Queue item, snapshot API và wrapper |
+| Thư viện nền | `middlewares/` | Cả nhóm hiểu vai trò, chưa cần học mọi hàm vendor | FreeRTOS scheduling, CMSIS wrapper, ST HAL peripheral API |
 
-| Tệp | Vai trò / hàm chính |
-|---|---|
-| app_cfg.h / app_ipc.h / task_*.h | Cấu hình RTOS/chu kỳ, extern Queue, entry points không tạo Task mới |
-| app_shared.h | Contract: mã nút, FSM, snapshot, Queue handles do CubeMX tạo |
-| button_filter.c | `button_filter_step`: đổi mẫu thì ghi thời điểm; chỉ chấp nhận khi ổn định >=30 ms; phép trừ unsigned chịu wrap |
-| task_input.c | Quét active-low, retry press pending ưu tiên PAUSE, không block chờ Queue; repeat có thể bỏ khi đầy |
-| game_engine.c | `can_place` kiểm biên trước khi đọc mảng; `lock_piece` khóa và compact hàng từ dưới lên; `spawn_next` reset mốc rơi; `game_tick` tiến deadline |
-| game_fsm.c | `handle_button` diễn giải nút theo một trong tám trạng thái; bỏ repeat trong menu |
-| game_internal.h | Trạng thái engine riêng cho GameTask; Display không được đọc trực tiếp |
-| task_game.c | Giới hạn 16 sự kiện/lượt, bỏ sự kiện tồn khi đổi màn; publish bản sao và token; bảo vệ sao chép bằng critical section |
-| hal_gpio.c / board_pins.h | Đọc sáu nút active-low; BSP dẫn tới pin mapping chính thức |
-| hal_buzzer.c | PWM PSC=71 → 1 MHz; ARR=1 MHz/f−1, CCR≈50%; deadline kết thúc âm, không HAL_Delay |
-| hal_oled.c | SSD1306 page mode, địa chỉ HAL 0x3C<<1; packet 129 byte; bus recovery bounded, không reset bus từ Task khác |
-| ui_renderer.c | Font 5×7, framebuffer 1024 byte, bàn 3×3 pixel/ô, tám màn hình và next preview |
-| task_display.c | Lấy token và snapshot, render/flush, giới hạn tốc độ 160 ms; backoff 500 ms khi lỗi |
-| app_diagnostics.c | Heap/stack high-water và thời gian tối đa, xem trong Keil Watch; fault dừng có mã nguyên nhân |
-| main.c | Chỉ cấu hình HAL/CubeMX, kiểm handles và gọi ba wrapper; không đặt engine vào main |
-
-Điểm dùng level **trước** khi xóa hàng. Level hiển thị bắt đầu 1, không làm thay đổi độ khó đã chọn. Pause/resume và sinh khối mới bắt đầu một khoảng rơi đầy đủ. Xoay O giữ nguyên vị trí; wall kick chỉ dịch ngang, không có floor kick/SRS đầy đủ.
-
-Không thêm Task UART riêng. USART1 hiện xuất log bằng ring buffer 512 byte và ngắt TXE; formatter nhỏ app_log không dùng printf. Xem docs/UART_DEBUG.md. Telemetry qua Watch vẫn được giữ.
+Xem [phân công](TEAM_ASSIGNMENT.md) và [hướng dẫn học chung](learning/00_KIEN_TRUC_CHUNG.md) trước khi đọc sâu Task của mình. Code và tài liệu cùng mô tả firmware hiện tại; tài liệu lịch sử được đặt ở `archive/` hoặc đánh dấu theo bản test cũ.

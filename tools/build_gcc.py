@@ -6,7 +6,7 @@ root=Path(__file__).resolve().parent.parent
 os.chdir(root)
 prefix=os.environ.get('ARM_GCC_PREFIX','arm-none-eabi-')
 cc=prefix+'gcc';out=root/'build/gcc';out.mkdir(parents=True,exist_ok=True)
-t=E.parse('Teris/MDK-ARM/Teris.uvprojx');base=root/'Teris/MDK-ARM'
+t=E.parse('MDK-ARM/Tetris_Joystick.uvprojx');base=root/'MDK-ARM'
 includes=next(n.text for n in t.iter('IncludePath') if n.text)
 inc=[str((base/p).resolve()) for p in includes.split(';') if p and 'portable/RVDS' not in p]
 inc.insert(0,str(root/'tools/gcc_port'))

@@ -7,6 +7,8 @@
 #include "app_log.h"
 #include "hal_uart.h"
 #include "hal_buzzer.h"
+/* Chan doan la du lieu quan sat; volatile khong phai co che khoa du lieu.
+ * Moi nhom chi so co Task ghi rieng; UART log chi lay mau de debug. */
 volatile AppDiagnostics app_diagnostics;
 extern osThreadId_t InputTaskHandle,GameTaskHandle,DisplayTaskHandle;
 void app_fault(AppFault reason) {

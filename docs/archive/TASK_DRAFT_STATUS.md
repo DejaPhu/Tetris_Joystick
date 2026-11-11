@@ -1,3 +1,5 @@
+> Tài liệu lưu trữ từ bản nhập mã trước đây; đường dẫn và trạng thái bên dưới không dùng làm hướng dẫn hiện tại. Xem [cấu trúc mới](../REPO_STRUCTURE.md) và [phân công học](../TEAM_ASSIGNMENT.md).
+
 # Lịch sử bản nháp
 
 Tài liệu bên dưới mô tả các PR nhập nháp ban đầu, không phải trạng thái integration hiện tại. Các lỗi đã sửa và việc ghép module được ghi trong README.md, docs/MODULES.md và docs/test-results/SYSTEM_V1.md. Chưa có kiểm thử board.

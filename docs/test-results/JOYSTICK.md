@@ -1,3 +1,5 @@
+> Báo cáo của mốc mã trước đây; đường dẫn mới và kết quả sau tổ chức lại xem [STRUCTURE_LEARNING.md](STRUCTURE_LEARNING.md).
+
 # Kết quả kiểm thử Tetris Joystick — 2026-11-11
 
 Nền: `36ea9cd444f3cb390b02e967306454244b80ea75`. Kết quả áp dụng cho bản tích hợp joystick; các báo cáo SYSTEM_V1/UART_DEBUG là lịch sử bản nền.
