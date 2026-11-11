@@ -1,0 +1,3 @@
+ARM GCC 12.2.1 / Cortex-M3 / -Os
+   text	   data	    bss	    dec	    hex	filename
+  23948	    144	  15608	  39700	   9b14	build/gcc/tetris.elf

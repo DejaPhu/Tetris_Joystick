@@ -1,0 +1,3 @@
+PASS: Keil source/include/memory references; exactly 3 application Tasks, 2 queues, 1 kernel start
+PASS: USART1 handler linked to nonblocking debug driver; no new RTOS objects
+PASS: ADC HAL enabled, CubeMX channels/sampling/12MHz clock, both ADCs calibrated

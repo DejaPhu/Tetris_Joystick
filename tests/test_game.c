@@ -57,8 +57,12 @@ int main(void) {
  handle_button(BTN_DROP);assert(game.state==STATE_PLAYING&&game.score==0);
  handle_button(BTN_PAUSE);assert(game.state==STATE_PAUSED);assert(!game_tick(now+100000));
  now=3000;handle_button(BTN_PAUSE);assert(game.last_fall_tick==now);
+ handle_button(BTN_PAUSE);assert(game.state==STATE_PAUSED);
+ now=3100;handle_button(BTN_LEFT);assert(game.state==STATE_PLAYING && game.last_fall_tick==now);
  memset(game.board,0,sizeof game.board);game.board[0][4]=1;game.next_piece=1;
  game.mask=0xf;game.piece_x=0;game.piece_y=19;lock_piece();assert(game.state==STATE_GAME_OVER);
+ handle_button(BTN_LEFT);assert(game.state==STATE_MAIN_MENU);
+ game.state=STATE_WIN;handle_button(BTN_LEFT);assert(game.state==STATE_MAIN_MENU);
  game.last_fall_tick=0xfffffff0U;game.state=STATE_PLAYING;game.difficulty=DIFFICULTY_HARD;
  assert(!game_tick(233));assert(game_tick(234));
  { GameSnapshot_t f;memset(&f,0,sizeof f);

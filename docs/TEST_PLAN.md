@@ -1,3 +1,5 @@
+> Bản joystick: xem [đấu dây, module và checklist phần cứng](JOYSTICK.md) và [kết quả kiểm thử mới](test-results/JOYSTICK.md). Nội dung bên dưới được giữ từ bản nền.
+
 # Checklist kiểm thử (để thành viên tự thực hiện sau)
 
 - [ ] STM32CubeIDE: F103C8Tx, clock 72MHz, SWD, TIM2 timebase.

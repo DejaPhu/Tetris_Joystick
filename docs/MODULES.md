@@ -1,3 +1,5 @@
+> Bản joystick: xem [đấu dây, module và checklist phần cứng](JOYSTICK.md) và [kết quả kiểm thử mới](test-results/JOYSTICK.md). Nội dung bên dưới được giữ từ bản nền.
+
 # Module và giải thích mã lệnh chính
 
 Comment trong nguồn giải thích mục đích, quyền sở hữu dữ liệu, giới hạn thời gian và xử lý lỗi; không lặp lại từng câu lệnh C hiển nhiên.

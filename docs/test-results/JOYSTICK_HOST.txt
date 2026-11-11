@@ -1,0 +1,5 @@
+PASS: debounce/repeat/wrap, FSM, gravity/deadlines, O rotation, wall, line clears 1-4, scoring, WIN/Retry/GameOver, UI states
+PASS: UART full/overflow/wrap, complete lines, IRQ drain, saved interrupt mask, formatter limits, bounded fatal flush
+PASS: neutral calibration, startup deflection, noise, thresholds/hysteresis, four directions, diagonal lock, ADC recovery, rotate once, hold repeat
+PASS: ADC pair, bounded timeout, start/poll/stop failure on either axis, no partial output
+PASS: InputTask analog-to-queue, glitch rejection, ADC disarm, legacy disabled, rotate/SW once, PAUSE priority, pending press retry, dropped repeats

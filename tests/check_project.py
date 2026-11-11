@@ -27,3 +27,15 @@ irq=(r/'bsp/src/stm32f1xx_it.c').read_text()
 assert len(re.findall(r'void USART1_IRQHandler\s*\(void\)',irq))==1
 assert 'uart_debug_irq();' in irq
 print('PASS: USART1 handler linked to nonblocking debug driver; no new RTOS objects')
+
+conf=(r/'bsp/inc/stm32f1xx_hal_conf.h').read_text()
+assert re.search(r'^\s*#define HAL_ADC_MODULE_ENABLED\s*$',conf,re.M)
+ioc=dict(line.split('=',1) for line in (r/'Teris/Teris.ioc').read_text().splitlines() if '=' in line)
+assert ioc['RCC.ADCPresc']=='RCC_ADCPCLK2_DIV6'
+assert ioc['RCC.ADCFreqValue']=='12000000'
+assert ioc['ADC1.Channel-0\\#ChannelRegularConversion']=='ADC_CHANNEL_0'
+assert ioc['ADC2.Channel-0\\#ChannelRegularConversion']=='ADC_CHANNEL_1'
+for adc in ['ADC1','ADC2']:
+ assert ioc[adc+'.SamplingTime-0\\#ChannelRegularConversion']=='ADC_SAMPLETIME_55CYCLES_5'
+ assert 'HAL_ADCEx_Calibration_Start(&hadc'+adc[-1]+')' in s
+print('PASS: ADC HAL enabled, CubeMX channels/sampling/12MHz clock, both ADCs calibrated')

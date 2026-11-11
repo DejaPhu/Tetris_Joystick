@@ -165,7 +165,7 @@ const uint8_t *ui_render(const GameSnapshot_t *frame)
     switch(frame->state) {
     case STATE_WELCOME:
         text_at(45U,16U,"TETRIS");
-        text_at(20U,36U,"PRESS DROP");
+        text_at(20U,36U,"PRESS JOY SW");
         break;
     case STATE_MAIN_MENU:
         text_at(34U,4U,"MAIN MENU");
@@ -174,10 +174,10 @@ const uint8_t *ui_render(const GameSnapshot_t *frame)
         break;
     case STATE_HELP:
         text_at(30U,2U,"CONTROLS");
-        text_at(2U,14U,"L/R MOVE ROT TURN");
+        text_at(2U,14U,"L/R MOVE UP TURN");
         text_at(2U,25U,"DOWN SOFT DROP");
-        text_at(2U,36U,"DROP HARD DROP");
-        text_at(2U,47U,"PAUSE BACK");
+        text_at(2U,36U,"SW HARD DROP / OK");
+        text_at(2U,47U,"PAUSE BACK / RESUME");
         break;
     case STATE_DIFFICULTY:
         text_at(25U,2U,"DIFFICULTY");

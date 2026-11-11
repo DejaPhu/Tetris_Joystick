@@ -20,7 +20,8 @@ typedef enum {
     BTN_DROP = 6
 } ButtonCode_t;
 
-/* Stored in one uint16_t queue item: bit 8 marks auto-repeat. */
+/* Logical controls: joystick UP maps to ROTATE, SW maps to DROP.
+ * Stored in one uint16_t queue item: bit 8 marks auto-repeat. */
 #define BUTTON_REPEAT_FLAG 0x0100U
 #define BUTTON_CODE_MASK   0x00FFU
 

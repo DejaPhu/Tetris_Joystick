@@ -30,11 +30,12 @@ t=850 GAME a=1 b=0 c=1
 | Event | a | b | c |
 |---|---|---|---|
 | BOOT | baud 115200 | 3 application Tasks | 2 Queues |
-| KEY_PRESS | mã nút sau debounce | index vật lý 0..5 | thời điểm nhấn được chấp nhận |
-| KEY_ENQ | mã đã gửi Queue thành công | index vật lý | 0 |
+| KEY_PRESS | mã nút sau debounce | index điều khiển 0..5 | thời điểm nhấn được chấp nhận |
+| KEY_ENQ | mã đã gửi Queue thành công | index điều khiển | 0 |
 | KEY_RX | mã GameTask vừa nhận | state trước xử lý | score trước xử lý |
 | GAME | state mới | score | difficulty |
-| INPUT_RAW | bitmask pressed của sáu nút | mức PB10: 1 thả, 0 nhấn | nibble cấu hình PB10, dự kiến 8 |
+| JOY_RAW | ADC PA0 0..4095 | ADC PA1 0..4095 | 1 cặp mẫu hợp lệ, 0 lỗi ADC |
+| JOY_CENTER | tâm X sau swap | tâm Y sau swap | 1 đã về tâm và sẵn sàng, 0 chưa sẵn sàng |
 | HEAP | free bytes | minimum-ever free bytes | 0 |
 | STACK_WORDS | Input free words | Game free words | Display free words |
 | INPUT_QUEUE | số lượt gửi press chưa được do Queue đầy | số event bị bỏ | 0 |
@@ -42,17 +43,17 @@ t=850 GAME a=1 b=0 c=1
 | UART_TX | số dòng bị bỏ do UART chưa sẵn sàng/quá đầy/quá dài | số byte đã nạp thanh ghi TX | 0 |
 | FAULT | reason 1 RTOS/2 malloc/3 stack/4 PWM | 0 | 0 |
 
-Mã nút: 1 LEFT, 2 RIGHT, 3 ROTATE, 4 DOWN, 5 PAUSE, 6 DROP. Index vật lý tương ứng là 0..5; bit 5 INPUT_RAW là HARD DROP. Không log từng repeat để giảm lưu lượng.
+Mã nút: 1 LEFT, 2 RIGHT, 3 ROTATE, 4 DOWN, 5 PAUSE, 6 DROP. Index điều khiển tương ứng là 0..5; index 5 là SW PB10. Không log từng repeat để giảm lưu lượng.
 
 State: 0 WELCOME, 1 MAIN_MENU, 2 HELP, 3 DIFFICULTY, 4 PLAYING, 5 PAUSED, 6 WIN, 7 GAME_OVER. Difficulty: 0 EASY, 1 NORMAL, 2 HARD. GAME chỉ xuất khi state hoặc score đổi; không xuất mỗi frame.
 
-INPUT_RAW và nhóm telemetry được lấy khoảng mỗi giây. Mẫu GPIO thưa có thể bỏ lỡ press ngắn; KEY_PRESS bắt theo debounce 10 ms/30 ms. STACK_WORDS nhân 4 để ra byte còn trống. Thời gian có độ phân giải 1 ms, không phải WCET chính xác. INPUT_QUEUE đếm lượt thử thất bại, không bằng số press mất. UART_TX bytes đếm byte giao cho phần cứng, không xác nhận máy tính nhận được.
+JOY_RAW/JOY_CENTER và nhóm telemetry được lấy khoảng mỗi giây. Mẫu ADC thưa có thể bỏ lỡ press ngắn; KEY_PRESS bắt theo debounce 10 ms/30 ms. STACK_WORDS nhân 4 để ra byte còn trống. Thời gian có độ phân giải 1 ms, không phải WCET chính xác. INPUT_QUEUE đếm lượt thử thất bại, không bằng số press mất. UART_TX bytes đếm byte giao cho phần cứng, không xác nhận máy tính nhận được.
 
 ## Tìm lỗi HARD DROP
 
-1. Giữ nút PB10 ít nhất 2 giây: INPUT_RAW b phải về 0; a có bit 5, ví dụ 32 nếu chỉ nhấn DROP; c dự kiến 8 (input pull-up/down). Thả nút: b=1, bit 5 mất.
-2. b luôn 1 khi nhấn: kiểm tra đúng PB10 thay vì PA10, GND, dây/nút. b luôn 0: kiểm tra chập GND/nút giữ. c khác 8: có cấu hình GPIO khác đang ghi đè hoặc firmware không đúng bản.
-3. RAW đúng nhưng thiếu KEY_PRESS a=6: kiểm tra debounce/chu kỳ InputTask. KEY_PRESS mà thiếu KEY_ENQ: xem INPUT_QUEUE.
+1. Nhấn SW nối PB10 xuống GND ít nhất 30 ms: phải có `KEY_PRESS a=6 b=5`, sau đó `KEY_ENQ a=6`. Giữ SW không sinh thêm press; nhả rồi nhấn lại để thử lần tiếp theo.
+2. Không có press: kiểm tra SW→PB10 (không phải PA10), GND chung và pull-up. Xem GPIOB IDR bit 10 trong debugger: thả = 1, nhấn = 0; CRH nibble PB10 dự kiến 8. `JOY_RAW` chỉ đo trục analog, không đo SW.
+3. GPIO đúng nhưng thiếu KEY_PRESS a=6: kiểm tra debounce/chu kỳ InputTask. KEY_PRESS mà thiếu KEY_ENQ: xem INPUT_QUEUE.
 4. KEY_ENQ mà thiếu KEY_RX: xem GameTask/Queue và thao tác đổi state. Khi đổi màn GameTask bỏ sự kiện tồn trong Queue để không áp dụng phím cũ vào màn mới; thử nhả/nhấn riêng từng lần.
 5. KEY_RX a=6 state 4 nhưng game không hard drop: lưu log, video và firmware SHA để kiểm tra engine. KEY_RX ở state 0/1/3 phải dẫn đến GAME chuyển state tương ứng.
 
@@ -66,4 +67,4 @@ INPUT_RAW và nhóm telemetry được lấy khoảng mỗi giây. Mẫu GPIO th
 
 ## Test trên kit cần ghi bằng chứng
 
-Mở terminal trước Reset → thấy BOOT/GAME; thử sáu nút/menu/gameplay; kiểm tra PB10 theo mục trên; so sánh telemetry với Keil Watch; thử chơi liên tục và kiểm tra UART dropped/heap/stack. Dùng logic analyzer đo PA9 115200 và độ trễ Task nếu cần. Chưa có các kết quả phần cứng này.
+Mở terminal trước Reset → thấy BOOT/GAME; thử bốn hướng joystick, SW, PAUSE/ROTATE và menu/gameplay; kiểm tra PB10 theo mục trên; so sánh telemetry với Keil Watch; thử chơi liên tục và kiểm tra UART dropped/heap/stack. Dùng logic analyzer đo PA9 115200 và độ trễ Task nếu cần. Chưa có các kết quả phần cứng này.

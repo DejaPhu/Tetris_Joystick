@@ -14,3 +14,5 @@ Nút trong game: LEFT/RIGHT = dịch, ROTATE = xoay, DOWN = soft drop, DROP = ha
 Chỉ GameTask xử lý chuyển state; DisplayTask chỉ hiển thị.
 
 MAIN_MENU có HELP, HELP dùng LEFT/PAUSE/DROP về menu. PAUSED có Resume/Restart/Main Menu. WIN được xét trước spawn; Retry giữ độ khó và reset board/score.
+
+Bản joystick: gạt lên = ROTATE, xuống = DOWN, SW = DROP. Phải = OK, trái = Back; tại PAUSED, trái hoặc PAUSE trở về PLAYING và đặt lại deadline rơi. Tại WIN/GAME_OVER, trái hoặc PAUSE về MAIN_MENU. Repeat chỉ có hiệu lực khi PLAYING.

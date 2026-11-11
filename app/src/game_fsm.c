@@ -60,7 +60,7 @@ uint8_t handle_button(uint16_t raw)
     case STATE_PAUSED:
         if(key==BTN_ROTATE) {game.menu_index=(game.menu_index+2U)%3U;return 1U;}
         if(key==BTN_DOWN) {game.menu_index=(game.menu_index+1U)%3U;return 1U;}
-        if(key==BTN_PAUSE) {
+        if(key==BTN_PAUSE || key==BTN_LEFT) {
             game.state=STATE_PLAYING;game.last_fall_tick=app_now_ms();return 1U;
         }
         if(key==BTN_DROP || key==BTN_RIGHT) {
@@ -76,7 +76,7 @@ uint8_t handle_button(uint16_t raw)
         if(key==BTN_ROTATE || key==BTN_DOWN) {
             game.menu_index^=1U;return 1U;
         }
-        if(key==BTN_PAUSE) {
+        if(key==BTN_PAUSE || key==BTN_LEFT) {
             game.state=STATE_MAIN_MENU;game.menu_index=0U;return 1U;
         }
         if(key==BTN_DROP || key==BTN_RIGHT) {

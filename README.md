@@ -1,49 +1,70 @@
-# Tetris — STM32F103C8T6 / Keil µVision 5 / HAL / CMSIS-RTOS v2
+# Tetris Joystick — STM32F103C8T6 + FreeRTOS
 
-Bản tích hợp có đầy đủ nguồn Keil, ba Task và module game/OLED/buzzer. **Đã kiểm thử logic trên host và cross-build ARM GCC; chưa build lại bản tích hợp bằng Keil hoặc chạy trên board.** Kết quả build Keil trước đó của người dùng chỉ áp dụng cho bộ khung.
+Điều khiển Tetris bằng joystick analog hai trục và nút SW, OLED SSD1306 128×64, buzzer và UART debug. Mã nền từ [Tetris-STM32F103-FreeRTOS](https://github.com/DejaPhu/Tetris-STM32F103-FreeRTOS), nhánh `feature/hal-uart-debug`, commit `36ea9cd444f3cb390b02e967306454244b80ea75` (đã bao gồm bản tích hợp `develop`). Nhánh `main` của repo nguồn tại thời điểm lấy mã chỉ có README.
 
-## Mở project
+Đã kiểm thử logic trên host và build/link ARM GCC trong giới hạn **64 KB Flash / 20 KB RAM** của STM32F103C8. **Chưa nạp thử board hoặc rebuild bằng Keil**; cần kiểm tra chiều joystick theo cách lắp thực tế.
 
-1. Checkout `develop` sau khi PR tích hợp được merge hoặc dùng `integration/system-v1` và giải nén toàn bộ. Giữ nguyên toàn bộ cây thư mục; xem [cấu trúc theo PDF](docs/REPO_STRUCTURE.md).
-2. Mở `Teris/MDK-ARM/Teris.uvprojx` bằng Keil µVision 5. Dùng Arm Compiler 5 phù hợp port FreeRTOS RVDS/ARM_CM3, bật C99 như project. Không chuyển Compiler 6 tự động.
-3. Target: STM32F103C8, IROM1 `0x08000000/0x10000`, IRAM1 `0x20000000/0x5000`; IROM1 Startup. Không dùng Flash 128 KB trên chip C8.
-4. Rebuild All, lưu Build Output và `.map`, sau đó nạp bằng ST-Link/SWD theo [hướng dẫn](docs/BOARD_TEST.md).
+## Đấu dây
 
-Không cần copy thủ công ba Task hoặc thêm lại Queue/Task: các nguồn đã có trong project. Không dùng `tests/host_stubs` trong Keil; đó chỉ là kiểu dữ liệu giả cho host tests.
+| Joystick | STM32 Blue Pill | Cấu hình |
+|---|---|---|
+| GND | GND | Chung mass |
+| +5V / VCC (tên in trên module) | **3.3V** | Cấp 3.3V để VRx/VRy không vượt mức ADC |
+| VRx | PA0 | ADC1_IN0, 12 bit |
+| VRy | PA1 | ADC2_IN1, 12 bit |
+| SW | PB10 | Input pull-up, nhấn xuống GND |
 
-## Chức năng
+| Thiết bị còn lại | Chân |
+|---|---|
+| Nút PAUSE | PA8 → GND |
+| Nút ROTATE bổ sung, tùy chọn | PB14 → GND |
+| OLED SSD1306, địa chỉ 7-bit 0x3C | PB8 SCL / PB9 SDA, I2C1 remap, pull-up 3.3V |
+| Buzzer thụ động | PB6, TIM4_CH1 PWM |
+| USB–UART TTL 3.3V | PA9 TX → RX adapter; GND chung; PA10 RX tùy chọn |
+| ST-Link SWD | PA13 SWDIO / PA14 SWCLK / GND |
 
-Bàn 10×20, 7 khối, xoay/wall-kick đơn giản (không phải full SRS), xóa 1–4 hàng, điểm 100/300/500/800 nhân level trước lần xóa; mỗi 10 hàng tăng level. Độ khó cố định EASY 800 ms, NORMAL 500 ms, HARD 250 ms. WIN khi score >=1000 ưu tiên trước spawn/Game Over. Có WELCOME, MAIN_MENU, HELP, DIFFICULTY, PLAYING, PAUSED, WIN, GAME_OVER; Retry, Main Menu, next preview, score/lines/level. Không có hold hoặc lưu high score sau mất nguồn.
+PB12/PB13/PB15 không cần nút nữa; mặc định phần mềm không đọc ba nút cũ này. PB10 được dùng trực tiếp cho SW, không cần thêm nút hard drop. Xem [hướng dẫn joystick](docs/JOYSTICK.md) và [pin mapping](docs/PIN_MAPPING.md).
 
-| Nút | Chân | Gameplay | Menu |
-|---|---|---|---|
-| LEFT | PB12 | Trái | Back tùy màn |
-| RIGHT | PB13 | Phải | Xác nhận |
-| ROTATE | PB14 | Xoay | Lên |
-| DOWN | PB15 | Soft drop | Xuống |
-| PAUSE | PA8 | Pause | Back/Resume |
-| HARD_DROP | PB10 | Hard drop | OK |
+## Điều khiển
 
-Nút nối xuống GND, active-low/pull-up. OLED SSD1306 128×64 I2C1: PB8 SCL/PB9 SDA, remap, 7-bit 0x3C, pull-up lên 3.3 V. Buzzer thụ động TIM4_CH1 PB6. UART PA9/PA10 115200; SWD PA13/PA14. Không đưa 5 V vào GPIO.
+| Thao tác | Khi chơi | Trong menu |
+|---|---|---|
+| Gạt trái | Di chuyển trái | Back |
+| Gạt phải | Di chuyển phải | OK |
+| Gạt lên | Xoay một lần mỗi lần gạt | Chọn mục trên |
+| Gạt xuống | Soft drop, giữ để lặp | Chọn mục dưới |
+| Nhấn SW | Hard drop một lần mỗi lần nhấn | OK |
+| Nút PAUSE | Pause/Resume | Back; ở màn PAUSED thì Resume |
+| Nút ROTATE tùy chọn | Xoay | Chọn mục trên |
 
-## Kiến trúc
+Nhả cần về tâm rồi gạt lại để chọn mục kế tiếp trong menu. Trái tại PAUSED trở về game; trái tại WIN/GAME_OVER trở về menu chính. Ở HELP, SW cũng quay về menu chính.
 
-- `bsp/` chứa pin/MCU; `hal/` chứa driver; `middlewares/` chứa CMSIS/FreeRTOS; `main.c` ở gốc; `app_cfg.h`, `app_ipc.h`, `task_*.h` là contract chung.
-- InputTask 10 ms: GPIO, debounce theo thời gian đủ 30 ms, auto-repeat 300/100 ms; giữ pending press khi Queue đầy, bỏ repeat có thống kê. Bộ đệm pending hữu hạn một press mỗi nút.
-- GameTask: engine + FSM + PWM; ngủ tối đa 20 ms và thức sớm theo deadline rơi. Chỉ Task này sửa dữ liệu game.
-- DisplayTask 160 ms: lấy token, sao chép snapshot trong critical section ngắn, render rồi truyền I2C; lỗi bus có clear tối đa 9 xung và retry sau 500 ms. Chưa đo timing bus trên phần cứng.
-- Hai Queue giữ `16 × uint16_t` mã nút và `1 × uint16_t` token. Không truyền snapshot qua Queue. Idle/Timer service là Task nội bộ FreeRTOS.
+## Mở và nạp bằng Keil
 
-UART debug USART1 PA9/PA10 115200 8N1 đã được thêm; xem [nối USB–UART và đọc log](docs/UART_DEBUG.md). Không thêm Task/Queue.
+1. Clone repo này, checkout `main` và giữ nguyên cây thư mục.
+2. Mở `Teris/MDK-ARM/Teris.uvprojx` bằng Keil µVision 5 với **Arm Compiler 5**, bật C99 như project. Port FreeRTOS hiện dùng `RVDS/ARM_CM3`.
+3. Target STM32F103C8: Flash `0x08000000`, size `0x10000`; RAM `0x20000000`, size `0x5000`. Rebuild All và nạp bằng ST-Link.
+4. Để joystick ở tâm khoảng **0,32 giây sau khi scheduler bắt đầu**. Nhấn SW để vào menu; chọn độ khó rồi chơi.
+5. Nếu chiều ngược hoặc trục bị đổi, chỉnh `JOYSTICK_INVERT_X`, `JOYSTICK_INVERT_Y`, `JOYSTICK_SWAP_XY` trong [joystick_config.h](app/inc/joystick_config.h), build và nạp lại. Mặc định X thấp = trái, Y thấp = lên.
 
-Xem [module và comment](docs/MODULES.md), [kiểm thử board](docs/BOARD_TEST.md), [kết quả kiểm chứng](docs/test-results/SYSTEM_V1.md). Không tự merge vào develop/main/release; integration là ứng viên để nhóm review.
+Không cần generate lại CubeMX. File `Teris/Teris.ioc` đã đồng bộ ADC với phần cứng trong `Joystick.zip`; cây thư mục đã được tổ chức lại so với CubeMX mặc định, xem [lưu ý regenerate](docs/JOYSTICK.md#cubemx-và-mã-nguồn).
 
-## Kiểm tra bổ sung trên Linux
+## Xử lý input và game
+
+- InputTask mỗi 10 ms đọc hai ADC, hiệu chỉnh tâm từ 32 mẫu, vùng kích hoạt ±700 và vùng nhả ±400 trên thang 0–4095. Gạt chéo khóa theo một trục; không đồng thời xoay và dịch ngang.
+- Debounce 30 ms. Giữ trái/phải/xuống lặp sau 300 ms, tiếp theo mỗi 100 ms; menu bỏ sự kiện repeat. Gạt lên và SW không tự lặp.
+- Lỗi đọc ADC không tạo sự kiện hướng mới; cần về tâm trước khi nhận lại hướng. PAUSE, SW và ROTATE vẫn hoạt động. Queue đầy: giữ một press chờ cho mỗi mã, ưu tiên PAUSE; repeat có thể bị bỏ và được thống kê.
+- Giữ nguyên **3 application Tasks, 2 Queues**, game engine, điểm số và kiến trúc snapshot. ADC polling có timeout 1 ms mỗi trục; không dùng DMA hay thêm Task.
+- Bàn 10×20, 7 khối, xoay/wall-kick đơn giản, xóa hàng, next preview, pause/retry/help. EASY 800 ms, NORMAL 500 ms, HARD 250 ms; WIN khi score ≥1000.
+
+## Kiểm tra trên máy
 
 ```sh
 python3 tests/check_project.py
 ./tests/run_host.sh
-python3 tools/build_gcc.py  # cần arm-none-eabi-gcc/newlib trong PATH
+python3 tools/build_gcc.py  # arm-none-eabi-gcc + newlib trong PATH
 ```
 
-GCC chỉ là build kiểm chứng bổ sung: dùng startup/linker/port GCC riêng trong `tools/`, không thay port và startup của Keil. Các sản phẩm build nằm trong `build/` và không commit. Không dùng số RAM/Flash GCC thay cho kết quả Keil.
+Host tests dùng AddressSanitizer/UndefinedBehaviorSanitizer: game/FSM, UART, hiệu chỉnh/hysteresis joystick, lỗi ADC và luồng InputTask → Queue. ARM GCC dùng startup/linker/port riêng trong `tools/`, tạo `build/gcc/tetris.elf` và `tetris.hex`; đây là build bổ sung, không thay kết quả Keil. Xem [kết quả kiểm thử](docs/test-results/JOYSTICK.md).
+
+UART 115200 8N1 ghi `JOY_RAW`, `JOY_CENTER`, `KEY_PRESS`, `KEY_ENQ`, `KEY_RX`, trạng thái game và telemetry. Xem [UART debug](docs/UART_DEBUG.md). Các tài liệu test cũ được giữ như lịch sử bản nền.

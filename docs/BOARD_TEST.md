@@ -1,3 +1,5 @@
+> Bản joystick: xem [đấu dây, module và checklist phần cứng](JOYSTICK.md) và [kết quả kiểm thử mới](test-results/JOYSTICK.md). Nội dung bên dưới được giữ từ bản nền.
+
 # Build Keil, nạp ST-Link và test chấp nhận
 
 ## Build/nạp
