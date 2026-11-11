@@ -8,6 +8,8 @@
 #include "app_diagnostics.h"
 #include "app_log.h"
 #include "hal_uart.h"
+/* TV2 - GAME: duy nhat Task nay sua Engine_t. published la ban sao
+ * cho TV3 doc; khong tra con tro den du lieu game dang thay doi. */
 static GameSnapshot_t published;
 static uint8_t frame_available;
 uint32_t app_now_ms(void) { return HAL_GetTick(); }
@@ -22,6 +24,8 @@ static void publish_snapshot(void)
         last_state=game.state;last_score=game.score;
     }
     memset(&frame,0,sizeof(frame));
+    /* Ban luu game.board chi chua cac khoi da khoa; chen khoi dang roi
+     * vao frame de ve, khong ghi nguoc vao board. */
     memcpy(frame.cells,game.board,sizeof(game.board));
     if(game.state==STATE_PLAYING || game.state==STATE_PAUSED) {
         for(r=0;r<4U;r++) for(c=0;c<4U;c++) {
@@ -42,6 +46,7 @@ static void publish_snapshot(void)
     frame.difficulty=game.difficulty;
     frame.next_piece=game.next_piece;
     /* Small bounded copy (~220 bytes) protected from DisplayTask read. */
+    /* Chi bao ve phep copy ngan. Khong ve/I2C/log trong critical section. */
     taskENTER_CRITICAL();
     published=frame;
     frame_available=1U;
@@ -55,6 +60,7 @@ uint8_t app_game_copy_snapshot(GameSnapshot_t *out)
     uint8_t ready;
     if (out == NULL) return 0U;
     taskENTER_CRITICAL();
+    /* Reader dung cung critical section voi writer de khong doc nua frame. */
     ready=frame_available;
     if(ready) *out=published;
     taskEXIT_CRITICAL();
@@ -73,6 +79,8 @@ void task_game_run(void *argument) {
         uint16_t raw;
         uint8_t changed=0U, count=0U;
         uint32_t began=app_now_ms();
+        /* Xu ly toi da 16 input moi vong de van danh thoi gian cho gravity,
+         * tat buzzer den han va cho cac Task khac chay. */
         while (count++ < 16U && osMessageQueueGet(xInputQueueHandle,&raw,NULL,0U)==osOK) {
             GameState_t before=game.state;
             if (!(raw & BUTTON_REPEAT_FLAG)) app_log("KEY_RX",raw,game.state,game.score);
@@ -84,6 +92,7 @@ void task_game_run(void *argument) {
             }
         }
         if (game_tick(app_now_ms())) changed=1U;
+        /* Buzzer active-low tu tao am; chi kiem tra han, khong delay cho het am. */
         tone_poll();
         if (changed) publish_snapshot();
         app_measure_game(app_now_ms()-began);

@@ -8,6 +8,8 @@
 #define TETRIS_GAME_PERIOD_MS    20U
 #define TETRIS_DISPLAY_PERIOD_MS 160U /* OLED 100-kHz I2C: full frame ~100 ms */
 
+/* CMSIS-RTOS2 stack_size tinh bang BYTE; cau hinh .ioc nhap so WORD 32-bit.
+ * Chi mot nguoi quan ly cau hinh va dong bo hai noi khi thay doi. */
 #define APP_INPUT_STACK_BYTES (192U * 4U)
 #define APP_GAME_STACK_BYTES (320U * 4U)
 #define APP_DISPLAY_STACK_BYTES (384U * 4U)

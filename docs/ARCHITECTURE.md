@@ -1,17 +1,30 @@
-# Kiến trúc tích hợp
+# Kiến trúc tổng quát
 
 ```mermaid
 flowchart LR
- GPIO[6 nút GPIO] --> Input[InputTask 10 ms]
- Input -->|Queue 16 x uint16_t| Game[GameTask: FSM và engine]
- Game --> PWM[TIM4 PWM]
- Game --> Snapshot[Snapshot có critical section]
- Game -->|Queue 1 x uint16_t token| Display[DisplayTask 160 ms]
- Snapshot --> Display
- Display --> Render[Renderer 1024 byte]
- Render --> OLED[SSD1306 I2C1]
+    ADC["PA0/PA1 ADC + SW/Pause/Rotate GPIO"] --> Input["InputTask — 10 ms"]
+    Input -->|"xInputQueue: 16 × uint16_t"| Game["GameTask — tối đa ngủ 20 ms"]
+    Game --> Buzzer["PB6 GPIO: HIGH tắt / LOW kêu"]
+    Game --> Snap["Snapshot mới nhất — copy có critical section"]
+    Game -->|"xFrameQueue: 1 × uint16_t token"| Display["DisplayTask — 160 ms"]
+    Snap --> Display
+    Display --> UI["ui_render: framebuffer 1024 byte"]
+    UI --> OLED["I2C1 PB8/PB9 — SSD1306"]
+    Input -.-> UART["UART ring buffer → USART1 TXE IRQ"]
+    Game -.-> UART
 ```
 
-Task/Queue được tạo duy nhất trong main.c bởi CubeMX. Không thêm Task diagnostics hoặc buzzer. Ba wrapper gọi module trong USER CODE. GameTask ngủ tối đa 20 ms, thức sớm theo deadline gravity. RTOS SysTick 1 kHz; HAL tick TIM2. Chỉ DisplayTask truy cập I2C1, chỉ GameTask điều khiển game/PWM. Kernel còn Idle/Timer service nội bộ.
+`main.c` khởi tạo board, kernel, hai Queue và ba Task; wrapper gọi các hàm `task_*_run`. Bốn lớp nguồn là BSP → HAL → middleware/API RTOS → application; quan hệ gọi thực tế là app gọi HAL/RTOS, HAL gọi ST HAL và BSP cung cấp cấu hình. Không phải chuỗi hàm gọi một chiều qua mọi lớp.
 
-Xem docs/MODULES.md và docs/test-results/SYSTEM_V1.md; chưa kiểm thử board.
+| Tài nguyên | Quyền sở hữu |
+|---|---|
+| ADC1/ADC2 và input GPIO | InputTask đọc; main cấu hình trước scheduler |
+| Engine_t, board, FSM | GameTask duy nhất ghi |
+| Buzzer PB6 | GameTask điều khiển; đường lỗi fatal được phép ép HIGH để tắt |
+| Snapshot published | GameTask ghi, DisplayTask copy qua critical section |
+| I2C1, OLED và framebuffer | DisplayTask độc quyền |
+| UART debug | Nhiều Task ghi qua ring buffer được bảo vệ PRIMASK; ISR lấy byte |
+
+Không có Task buzzer/UART riêng hoặc mutex I2C vì hiện chỉ một Task dùng bus. Critical section chỉ bao quanh copy snapshot ngắn, không bao quanh render/I2C. Kernel vẫn có Idle/Timer service nội bộ; “3 Task” ở đây là ba Task ứng dụng. HAL tick dùng TIM2; FreeRTOS tick dùng SysTick.
+
+Đọc [kiến thức chung](learning/00_KIEN_TRUC_CHUNG.md) để hiểu startup, priority, stack/heap, contract Queue, timing và cách kiểm tra. [Phân công](TEAM_ASSIGNMENT.md) xác định người phụ trách từng Task. Chưa có kết quả nghiệm thu phần cứng cho bản hiện tại.

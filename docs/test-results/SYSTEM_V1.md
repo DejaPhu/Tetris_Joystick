@@ -1,3 +1,5 @@
+> Báo cáo của mốc mã trước đây; đường dẫn mới và kết quả sau tổ chức lại xem [STRUCTURE_LEARNING.md](STRUCTURE_LEARNING.md).
+
 # System-v1: kết quả kiểm chứng phần mềm, 10/11/2026
 
 ## Đã thực hiện

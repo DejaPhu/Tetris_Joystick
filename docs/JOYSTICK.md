@@ -43,7 +43,7 @@ Không đổi kích thước Queue hay quyền sở hữu game. `BTN_ROTATE` đ�
 
 ## CubeMX và mã nguồn
 
-`Teris/Teris.ioc` giữ cấu hình Tasks/Queues/UART IRQ của bản nền và bổ sung ADC từ ZIP. Keil trỏ tới `main.c` ở gốc và `bsp/`, `hal/`, `app/`, `middlewares/`. CubeMX mặc định tạo `Core/Src` và `Drivers`; generate trực tiếp rồi build mà không tích hợp lại sẽ bỏ qua nguồn tùy chỉnh. Nếu cần regenerate, thực hiện vào thư mục tạm, đối chiếu ADC/MSP/HAL config, giữ wrapper `task_*_run`, queue contract và USART1 IRQ tùy chỉnh; kiểm tra lại bằng `tests/check_project.py`.
+`Tetris_Joystick.ioc` giữ cấu hình Tasks/Queues/UART IRQ của bản nền và bổ sung ADC từ ZIP. Keil trỏ tới `main.c` ở gốc và `bsp/`, `hal/`, `app/`, `middlewares/`. CubeMX mặc định tạo `Core/Src` và `Drivers`; generate trực tiếp rồi build mà không tích hợp lại sẽ bỏ qua nguồn tùy chỉnh. Nếu cần regenerate, thực hiện vào thư mục tạm, đối chiếu ADC/MSP/HAL config, giữ wrapper `task_*_run`, queue contract và USART1 IRQ tùy chỉnh; kiểm tra lại bằng `tests/check_project.py`.
 
 ## Thử trên board
 

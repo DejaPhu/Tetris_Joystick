@@ -1,3 +1,5 @@
+> Báo cáo của mốc mã trước đây; đường dẫn mới và kết quả sau tổ chức lại xem [STRUCTURE_LEARNING.md](STRUCTURE_LEARNING.md).
+
 # UART debug: kiểm chứng phần mềm, 11/11/2026
 
 - Project checker PASS: mọi nguồn/include Keil, đúng 3 Tasks, 2 Queues, 1 kernel start; USART1_IRQHandler chỉ được định nghĩa một lần và gọi driver debug.
