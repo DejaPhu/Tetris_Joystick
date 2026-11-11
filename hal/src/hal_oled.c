@@ -5,6 +5,8 @@
 extern I2C_HandleTypeDef hi2c1;
 #define OLED_WIDTH 128U
 #define OLED_I2C_ADDR (0x3CU << 1)
+/* TV3: 0x00 bao byte lenh, 0x40 bao byte du lieu cho SSD1306.
+ * HAL I2C yeu cau dia chi 0x3C dich trai 1 bit; khong dich hai lan. */
 static HAL_StatusTypeDef oled_cmd(uint8_t cmd)
 {
     uint8_t packet[2]={0x00U,cmd};
@@ -30,6 +32,8 @@ uint8_t oled_flush(const uint8_t *framebuffer)
 {
     uint8_t page,packet[1U+OLED_WIDTH];
     packet[0]=0x40U;  /* data control byte */
+    /* Moi page chua 128 cot x 8 pixel = 128 byte; 8 page tao 128x64.
+     * I2C duoc goi ngoai critical section, co timeout va tra loi cho Task. */
     for(page=0;page<8U;page++) {
         if(oled_cmd((uint8_t)(0xB0U|page))!=HAL_OK) return 0U;
         if(oled_cmd(0x00U)!=HAL_OK) return 0U;

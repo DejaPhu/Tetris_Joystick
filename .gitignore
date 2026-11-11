@@ -18,7 +18,7 @@ Thumbs.db
 # Keep *.ioc, .project and .cproject once Leader adds them
 
 # Keil generated outputs and per-user settings
-**/MDK-ARM/Teris/
+MDK-ARM/Tetris_Joystick/
 *.axf
 *.crf
 *.lnp

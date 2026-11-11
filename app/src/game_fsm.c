@@ -2,8 +2,11 @@
 #include "game_internal.h"
 uint8_t handle_button(uint16_t raw)
 {
+    /* Cung ma phim nhung hanh dong phu thuoc state: SW la OK trong menu,
+     * hard drop trong PLAYING. Tach byte ma va bit repeat truoc khi xu ly. */
     ButtonCode_t key = (ButtonCode_t)(raw & BUTTON_CODE_MASK);
     uint8_t repeated = ((raw & BUTTON_REPEAT_FLAG) != 0U);
+    /* Menu chi di mot muc moi lan gat; repeat chi co hieu luc khi dang choi. */
     if (repeated && game.state != STATE_PLAYING) return 0U;
 
     switch(game.state) {
@@ -57,6 +60,8 @@ uint8_t handle_button(uint16_t raw)
             game.state=STATE_PAUSED;game.menu_index=0U;return 1U;
         }
         return 0U;
+    /* Khi resume phai dat lai last_fall_tick, neu khong khoi se roi ngay
+     * do tinh ca thoi gian da dung trong man PAUSED. */
     case STATE_PAUSED:
         if(key==BTN_ROTATE) {game.menu_index=(game.menu_index+2U)%3U;return 1U;}
         if(key==BTN_DOWN) {game.menu_index=(game.menu_index+1U)%3U;return 1U;}

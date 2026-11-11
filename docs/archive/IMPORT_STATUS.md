@@ -1,3 +1,5 @@
+> Tài liệu lưu trữ từ bản nhập mã trước đây; đường dẫn và trạng thái bên dưới không dùng làm hướng dẫn hiện tại. Xem [cấu trúc mới](../REPO_STRUCTURE.md) và [phân công học](../TEAM_ASSIGNMENT.md).
+
 # Cập nhật integration
 
 Project Keil hiện đã được cấu hình memory/include và thêm nguồn ứng dụng. Ba wrappers đã nối module; xem README.md và docs/BOARD_TEST.md. Ghi chú bên dưới là lịch sử nhập nguồn gốc. Chưa chạy Keil/board cho bản tích hợp.

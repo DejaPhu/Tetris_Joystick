@@ -146,6 +146,8 @@ int main(void)
 
   /* USER CODE END 2 */
 
+  /* Ca nhom phai nam: init phan cung -> kernel -> 2 Queue -> 3 Task
+   * -> scheduler. Task chua chay cho den khi kernel duoc start. */
   /* Init scheduler */
   if (osKernelInitialize()!=osOK) Error_Handler();
 
@@ -161,6 +163,8 @@ int main(void)
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Queue input: 16 phan tu uint16_t. Queue frame: 1 token uint16_t.
+   * Snapshot lon duoc copy qua API rieng, khong nham size token voi frame. */
   /* Create the queue(s) */
   /* creation of xInputQueue */
   xInputQueueHandle = osMessageQueueNew (16, sizeof(uint16_t), &xInputQueue_attributes);
@@ -172,6 +176,7 @@ int main(void)
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
+  /* Tao dung mot lan. Cac ham task_*_run trong app/ khong tu tao thread. */
   /* Create the thread(s) */
   /* creation of InputTask */
   InputTaskHandle = osThreadNew(StartInputTask, NULL, &InputTask_attributes);
@@ -424,7 +429,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
-  /* Preload HIGH before enabling output: no startup LOW pulse. */
+  /* PB6 HIGH = tat module buzzer LOW-trigger; preload truoc khi enable output. */
   HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
   GPIO_InitStruct.Pin = BUZZER_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;

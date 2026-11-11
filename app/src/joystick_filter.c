@@ -9,11 +9,14 @@ void joystick_filter_init(JoystickFilter *j) {
 }
 uint8_t joystick_filter_step(JoystickFilter *j,uint16_t x,uint16_t y,uint8_t valid) {
     int32_t dx,dy,ax,ay;
+    /* Khong dung lai mau cu khi ADC loi. Sau hoi phuc phai ve tam moi nhan huong. */
     if (!valid || x>4095U || y>4095U) {
         if (!j->ready) joystick_filter_init(j);
         j->armed=0U;j->direction=0U;return 0U;
     }
     if (JOYSTICK_SWAP_XY) {uint16_t tmp=x;x=y;y=tmp;}
+    /* 32 mau dau: tinh trung binh + kiem tra bien do dao dong.
+     * Khong choi trong luc hieu chinh; neu can dang gat thi dung tam 2048. */
     if (!j->ready) {
         j->sum_x+=x;j->sum_y+=y;
         if(x<j->min_x)j->min_x=x;
@@ -35,6 +38,8 @@ uint8_t joystick_filter_step(JoystickFilter *j,uint16_t x,uint16_t y,uint8_t val
     if(JOYSTICK_INVERT_X)dx=-dx;
     if(JOYSTICK_INVERT_Y)dy=-dy;
     ax=dx<0?-dx:dx;ay=dy<0?-dy:dy;
+    /* Hai nguong tao hysteresis: vao huong tai 700, nha tai 400.
+     * armed ngan mot can dang bi gat luc boot/loi tu phat su kien. */
     if(!j->armed) {
         if(ax<=JOYSTICK_RELEASE && ay<=JOYSTICK_RELEASE)j->armed=1U;
         return 0U;

@@ -5,6 +5,8 @@
 #define OLED_HEIGHT   64U
 #define OLED_I2C_ADDR (0x3CU << 1)
 
+/* TV3: moi byte chua 8 pixel doc theo page SSD1306, tong 1024 byte.
+ * Chi DisplayTask goi renderer, nen buffer tinh nay khong can mutex. */
 static uint8_t framebuffer[OLED_WIDTH * OLED_HEIGHT / 8U];
 
 /* 5x7 font: A-Z (0-25), 0-9 (26-35), space (36), ':' (37),
@@ -159,6 +161,7 @@ static void draw_game_board(const GameSnapshot_t *frame)
     text_uint(72U,53U,frame->lines);
 }
 
+/* Ve tu snapshot bat bien trong lan goi; khong doc truc tiep bien game. */
 const uint8_t *ui_render(const GameSnapshot_t *frame)
 {
     memset(framebuffer,0,sizeof(framebuffer));

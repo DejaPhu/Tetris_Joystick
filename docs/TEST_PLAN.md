@@ -1,14 +1,20 @@
-> Bản joystick: xem [đấu dây, module và checklist phần cứng](JOYSTICK.md) và [kết quả kiểm thử mới](test-results/JOYSTICK.md). Nội dung bên dưới được giữ từ bản nền.
+# Kế hoạch kiểm tra cho ba thành viên
 
-# Checklist kiểm thử (để thành viên tự thực hiện sau)
+| Lớp kiểm tra | Ai thực hiện chính | Phạm vi | Trạng thái hiện tại |
+|---|---|---|---|
+| Project paths | Cả nhóm, TV1 tổng hợp | Keil include/source/startup, MCU memory, Tasks/Queues/ADC/buzzer | Script PASS; xem báo cáo mới |
+| Input mock | TV1 | Calibration, debounce, repeat, ADC lỗi và Queue đầy | Host tests PASS |
+| Game/buzzer mock | TV2 | Engine/FSM/điểm/gravity/snapshot contract, buzzer mức logic/deadline | Host tests PASS cho engine/FSM/UI/buzzer; snapshot cần đọc/review và demo tổng |
+| Renderer/Display | TV3 | Render các state trên host; pixel/layout/I2C retry trên kit | Host render safety PASS; hình ảnh/bus cần đo |
+| ARM cross-build | Cả nhóm | Source/linker trong 64 KB Flash và 20 KB RAM | ARM GCC PASS |
+| Keil / board | Cả nhóm theo Task | Compiler 5, nạp kit, dây, hướng, timing, heap/stack, chạy lâu | Chưa thực hiện tại môi trường này |
 
-- [ ] STM32CubeIDE: F103C8Tx, clock 72MHz, SWD, TIM2 timebase.
-- [ ] OLED SSD1306 nhận I2C1 remap PB8/PB9 và hiện đúng.
-- [ ] Buzzer TIM4_CH1 PB6 tạo được âm không chặn scheduler.
-- [ ] 6 nút active-low đọc đúng, đã debounce.
-- [ ] USART1 log được.
-- [ ] Đúng ba Task ứng dụng; không tạo trùng ở CubeMX.
-- [ ] xInputQueue và xFrameQueue hoạt động.
-- [ ] FSM menu, difficulty, pause, retry, YOU WIN và GAME_OVER đúng.
-- [ ] 3 độ khó chạy khác nhau; điều kiện điểm thắng đúng.
-- [ ] Kiểm tra heap, stack high-water, lỗi overflows và test trên board.
+Chạy chung:
+
+```sh
+python3 tests/check_project.py
+./tests/run_host.sh
+python3 tools/build_gcc.py
+```
+
+[Báo cáo tổ chức lại](test-results/STRUCTURE_LEARNING.md), [checklist board](BOARD_TEST.md), [kiểm tra kiến thức và review chéo](learning/04_HOC_VA_KIEM_TRA_CHEO.md). Mỗi lần sửa chức năng cần ghi rõ test đã chạy và giới hạn của test; không ghi chung “PASS tất cả” khi chỉ có mock.

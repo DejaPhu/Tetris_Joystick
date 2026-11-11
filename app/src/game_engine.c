@@ -14,6 +14,8 @@ static const uint16_t piece_masks[7] = {
     SHAPE(TILE(0,2),TILE(1,0),TILE(1,1),TILE(1,2))
 };
 
+/* TV2: board[][] la luoi 10x20, 0 rong / 1..7 loai khoi.
+ * mask la khoi 4x4 dang roi; toa do piece_x/y la goc mask tren board. */
 Engine_t game;
 static uint32_t rng_state;
 static uint8_t random_piece(void)
@@ -36,6 +38,7 @@ uint8_t occupied(uint16_t mask, uint8_t row, uint8_t col)
     return (uint8_t)((mask >> (row * 4U + col)) & 1U);
 }
 
+/* Kiem tra truoc khi truy cap mang: toa do am/ngoai bien khong hop le. */
 static uint8_t can_place(uint16_t mask, int8_t px, int8_t py)
 {
     uint8_t r,c;
@@ -51,6 +54,7 @@ static uint8_t can_place(uint16_t mask, int8_t px, int8_t py)
     return 1U;
 }
 
+/* Xoay 90 do: o (r,c) cua mask 4x4 chuyen thanh (c,3-r). */
 static uint16_t rotate_mask(uint16_t mask)
 {
     uint16_t out = 0U;
@@ -117,6 +121,8 @@ void start_game(void)
     spawn_next();
 }
 
+/* Khoa khoi -> don hang -> tinh diem -> kiem tra WIN -> sinh khoi tiep.
+ * Thu tu nay giup WIN khong bi GAME_OVER ghi de trong cung luot. */
 void lock_piece(void)
 {
     uint8_t r,c,y,src,dst;
@@ -132,6 +138,8 @@ void lock_piece(void)
         }
     }
     /* Compact all surviving rows from bottom to top. */
+    /* Doc tu duoi len, chi copy hang chua day xuong dst.
+     * Sau cung xoa cac hang trong o phia tren, khong bo sot hai hang day lien nhau. */
     dst = TETRIS_ROWS;
     for (src=TETRIS_ROWS; src>0U;) {
         uint8_t full = 1U;
@@ -168,6 +176,7 @@ void game_init(uint32_t seed) {
     game.state = STATE_WELCOME;
     game.difficulty = DIFFICULTY_NORMAL;
 }
+/* Khong dung delay de roi: deadline doc lap voi toc do nhan input/ve OLED. */
 uint8_t game_tick(uint32_t now) {
     if (game.state != STATE_PLAYING) return 0U;
     if ((uint32_t)(now - game.last_fall_tick) < gravity_ms()) return 0U;
